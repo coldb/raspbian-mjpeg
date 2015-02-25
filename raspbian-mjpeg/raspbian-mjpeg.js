@@ -1,11 +1,4 @@
-﻿/*
- * Config options
- * - fps: 25;
- * - mJpegFilePath: string; 
- * - statusFilePath: string; 
- * - fifoFilePath: string; 
- */
-if (typeof String.prototype.endsWith !== 'function') {
+﻿if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function (suffix) {
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
     };
@@ -16,7 +9,6 @@ var fs = require('fs'),
     _ = require('underscore'),
     VError = require('verror'),
     now = require("performance-now");
-
 
 var raspbianMJpeg = function (options) {
     var activeStatus = null,
@@ -129,14 +121,6 @@ var raspbianMJpeg = function (options) {
         options.mediaFolder += '/';
     }
     
-    //if (!_.isString(config.imageDir) || config.imageDir == '') {
-    //    throw new Error("Missing image directory or empty string in configuration object");
-    //}
-    
-    //if (!_.isString(config.videoDir) || config.videoDir == '') {
-    //    throw new Error("Missing video directory or empty string in configuration object");
-    //}
-    
     if (!fs.existsSync(options.statusFilePath)) {
         throw new Error("Status file doesn't exist");
     }
@@ -169,9 +153,9 @@ var raspbianMJpeg = function (options) {
          * - ready: camera is running
          * - md_ready: ???
          * - video: ???
-         * - timelapse: ???
+         * - timelapse: timelapse is running
          * - md_video: ???
-         * - image: ???
+         * - image: image being taken
          * - boxing: ???
          * - md_boxing: ???
          * - halted: camera is stopped
@@ -236,10 +220,17 @@ var raspbianMJpeg = function (options) {
 
             addCommand("im");
         },
-        startTimelapse: function() {
+        startTimelapse: function(interval, onTimelapseStartedCallback) {
             createdFiles = [];
             
-            addCommand("tl " + (1 * 10));
+            var onStatusChange = this.onStatusChange(function (status) {
+                if (status == 'timelapse') {
+                    onStatusChange();
+                    onTimelapseStartedCallback();
+                }
+            });
+
+            addCommand("tl " + (interval * 10));
         },
         stopTimelapse: function(onTimelapseCompleteCallback) {
             var onStatusChange = this.onStatusChange(function (status) {
