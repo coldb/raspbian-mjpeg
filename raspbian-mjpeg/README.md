@@ -31,6 +31,9 @@ Possible status values
 Starts the camera and sets a callback to be triggererd when the camera is started.
 * callback(err): Provides Error as the first argument if an error occures (null on no error).
 
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "halted". The status needs to be "halted" to start the camera.
 
@@ -38,5 +41,16 @@ Possible returned errors:
 Stops the camera and sets a callback to be triggered when the camera is stopped.
 * callback(err): Provides Error as the first argument if an error occures (null on no error).
 
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to stop the camera.
+
+#### disposeCamera(callback)
+Stop the camera independent of the state it is in. If video is being recorded then recording is stopped and camera is stopped. The same goes for timelapse as well.
+* callback(err): Provides error as the first argument if an error occures (null on no error).
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+

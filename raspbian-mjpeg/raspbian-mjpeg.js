@@ -23,9 +23,9 @@ var raspbianMJpeg = function (options) {
             mediaFolder: null
         },
         createdFiles = [];
-
+    
     options = _.extend(baseOptions, options);
-
+    
     function startPreviewImageUpdate(duration) {
         stopPreviewImageUpdate();
         previewImageTimeoutHandle = setTimeout(updatePreviewImage, duration);
@@ -39,15 +39,15 @@ var raspbianMJpeg = function (options) {
         var start = now(),
             data = fs.readFileSync(options.mJpegFilePath),
             end;
-    
-        _.each(onPreviewCallbacks, function(callbackFn) {
+        
+        _.each(onPreviewCallbacks, function (callbackFn) {
             callbackFn(data);
         });
-
+        
         data = null;
-
+        
         end = now();
-
+        
         startPreviewImageUpdate(Math.max(0, (1000 / options.fps) - (end - start)));
     }
     
@@ -66,7 +66,7 @@ var raspbianMJpeg = function (options) {
             }
         }
     }
-
+    
     function addCommand(command) {
         exec('echo "' + command + '" > FIFO', function (error, stdout, stderr) {
             //console.log('stdout: ' + stdout);
@@ -91,7 +91,7 @@ var raspbianMJpeg = function (options) {
             });
         }
     }
-
+    
     if (!_.isObject(options)) {
         throw new TypeError("Missing configuration object for raspbian-mjpeg");
     }
@@ -107,7 +107,7 @@ var raspbianMJpeg = function (options) {
     if (!_.isString(options.mJpegFilePath) || options.mJpegFilePath == '') {
         throw new Error("MJpeg file path is not a valid string or is missing");
     }
-
+    
     if (!_.isString(options.statusFilePath) || options.statusFilePath == '') {
         throw new Error("Status file path is not a valid string or is missing");
     }
@@ -131,38 +131,38 @@ var raspbianMJpeg = function (options) {
     if (!fs.existsSync(options.fifoFilePath)) {
         throw new Error("FIFO file doesn't exist");
     }
-
+    
     updateStatus();
     
     updatePreviewImage();
-
-    fs.watch(options.statusFilePath, function(event) {
+    
+    fs.watch(options.statusFilePath, function (event) {
         if (event == 'change') {
             updateStatus();
         }
     });
     
-    fs.watch(options.mediaFolder, function(event, fileName) {
+    fs.watch(options.mediaFolder, function (event, fileName) {
         fileName = options.mediaFolder + fileName;
         
         if (!_.contains(createdFiles, fileName)) {
             createdFiles.push(fileName);
         }
     });
-
+    
     return {
-        onStatusChange: function(onStatusChangeCallback) {
+        onStatusChange: function (onStatusChangeCallback) {
             if (!_.isFunction(onStatusChangeCallback)) {
                 throw new TypeError("Provided argument is not a valid callback function");
             }
-
+            
             onStatusChangeCallbacks.push(onStatusChangeCallback);
-
-            return function() {
+            
+            return function () {
                 onStatusChangeCallbacks = _.without(onStatusChangeCallbacks, onStatusChangeCallback);
             };
         },
-        startCamera: function(onStartedCallback) {
+        startCamera: function (onStartedCallback) {
             if (!_.isFunction(onStartedCallback)) {
                 var typeError = new TypeError("Provided argument is not a valid callback function");
                 typeError.propertyName = 'onStartedCallback';
@@ -175,17 +175,17 @@ var raspbianMJpeg = function (options) {
                 onStartedCallback(error);
                 return;
             }
-
+            
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'ready') {
                     onStatusChange();
                     onStartedCallback(null);
                 }
             });
-
+            
             addCommand("ru 1");
         },
-        stopCamera: function(onStoppedCallback) {
+        stopCamera: function (onStoppedCallback) {
             if (!_.isFunction(onStoppedCallback)) {
                 var typeError = new TypeError("Provided argument is not a valid callback function");
                 typeError.propertyName = 'onStoppedCallback';
@@ -208,7 +208,31 @@ var raspbianMJpeg = function (options) {
             
             addCommand("ru 0");
         },
-        takePicture: function(onImageTakenCallback) {
+        disposeCamera: function (onDisposedCallback) {
+            if (!_.isFunction(onDisposedCallback)) {
+                var typeError = new TypeError("Provided argument is not a valid callback function");
+                typeError.propertyName = 'onDisposedCallback';
+                throw typeError;
+            }
+            
+            if (activeStatus == 'ready') {
+                this.stopCamera(function () { onDisposedCallback(); });
+            }
+            else if (activeStatus == 'video') {
+                this.stopVideo(function () { onDisposedCallback(); });
+            }
+            else if (activeStatus == 'timelapse') {
+                this.stopTimelapse(function () { onDisposedCallback(); });
+            }
+            
+            var onStatusChange = this.onStatusChange(function (status) {
+                if (status == 'ready') {
+                    onStatusChange();
+                    this.stopCamera(function () { onDisposedCallback(); });
+                }
+            });
+        },
+        takePicture: function (onImageTakenCallback) {
             if (activeStatus != 'ready') {
                 return;
             }
@@ -221,10 +245,10 @@ var raspbianMJpeg = function (options) {
                     onImageTakenCallback(createdFiles);
                 }
             });
-
+            
             addCommand("im");
         },
-        startTimelapse: function(interval, onTimelapseStartedCallback) {
+        startTimelapse: function (interval, onTimelapseStartedCallback) {
             createdFiles = [];
             
             var onStatusChange = this.onStatusChange(function (status) {
@@ -233,10 +257,10 @@ var raspbianMJpeg = function (options) {
                     onTimelapseStartedCallback();
                 }
             });
-
+            
             addCommand("tl " + (interval * 10));
         },
-        stopTimelapse: function(onTimelapseCompleteCallback) {
+        stopTimelapse: function (onTimelapseCompleteCallback) {
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'ready') {
                     onStatusChange();
@@ -246,14 +270,14 @@ var raspbianMJpeg = function (options) {
             
             addCommand("tl 0");
         },
-        startVideo: function() {
+        startVideo: function () {
             addCommand("ca 1");
         },
-        stopVideo: function() {
+        stopVideo: function () {
             addCommand("ca 0");
         },
-
-        onPreviewImage: function(onPreviewCallback) {
+        
+        onPreviewImage: function (onPreviewCallback) {
             if (!_.isFunction(onPreviewCallback)) {
                 throw new TypeError("Provided argument is not a valid callback function");
             }
