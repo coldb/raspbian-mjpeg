@@ -164,38 +164,45 @@ var raspbianMJpeg = function (options) {
         },
         startCamera: function(onStartedCallback) {
             if (!_.isFunction(onStartedCallback)) {
-                throw new TypeError("Provided argument is not a valid callback function");
+                var typeError = new TypeError("Provided argument is not a valid callback function");
+                typeError.propertyName = 'onStartedCallback';
+                throw typeError;
             }
             
             if (activeStatus != 'halted') {
-                onStartedCallback();
+                var error = new VError("Camera is already running");
+                error.name = "invalidStatus";
+                onStartedCallback(error);
                 return;
             }
 
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'ready') {
                     onStatusChange();
-                    onStartedCallback();
+                    onStartedCallback(null);
                 }
             });
 
             addCommand("ru 1");
-
         },
         stopCamera: function(onStoppedCallback) {
             if (!_.isFunction(onStoppedCallback)) {
-                throw new TypeError("Provided argument is not a valid callback function");
+                var typeError = new TypeError("Provided argument is not a valid callback function");
+                typeError.propertyName = 'onStoppedCallback';
+                throw typeError;
             }
             
             if (activeStatus != 'ready') {
-                // TODO: When not ready to stop add callback to stop when needed
+                var error = new VError("Camera can be stopped only when status is 'ready'");
+                error.name = "invalidStatus";
+                onStoppedCallback(error);
                 return;
             }
             
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'halted') {
                     onStatusChange();
-                    onStoppedCallback();
+                    onStoppedCallback(null);
                 }
             });
             

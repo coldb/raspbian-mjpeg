@@ -26,3 +26,17 @@ Possible status values
 * boxing: mp4box is running on video
 * md_boxing: ???
 * halted: camera is stopped
+
+#### startCamera(callback)
+Starts the camera and sets a callback to be triggererd when the camera is started.
+* callback(err): Provides Error as the first argument if an error occures (null on no error).
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "halted". The status needs to be "halted" to start the camera.
+
+#### stopCamera(callback)
+Stops the camera and sets a callback to be triggered when the camera is stopped.
+* callback(err): Provides Error as the first argument if an error occures (null on no error).
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to stop the camera.
