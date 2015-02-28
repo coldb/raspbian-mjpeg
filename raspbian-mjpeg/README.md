@@ -12,9 +12,8 @@ See this guide on how to get [node.js running on Raspberry Pi](http://joshondesi
 
 ### Methods
 
-#### onStatusChange(callback)
-Sets a callback function to be triggered when the RaspiMJPEG status changes. 
-* callback(err, newStatus): Provides Error as the first argument if an error occured (null otherwise). Second argument is the new status as a string. 
+#### getStatus()
+Returns current status.
 
 Possible status values
 * ready: camera is running
@@ -27,6 +26,12 @@ Possible status values
 * md_boxing: ???
 * halted: camera is stopped
 
+#### onStatusChange(callback)
+Sets a callback function to be triggered when the RaspiMJPEG status changes. 
+* callback(err, newStatus): Provides Error as the first argument if an error occured (null otherwise). Second argument is the new status as a string. 
+
+Possible values are listed under the getStatus() API methods documentation.
+
 #### startCamera(callback)
 Starts the camera and sets a callback to be triggererd when the camera is started.
 * callback(err): Provides Error as the first argument if an error occures (null on no error).
@@ -38,7 +43,7 @@ Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "halted". The status needs to be "halted" to start the camera.
 
 #### stopCamera(callback)
-Stops the camera and sets a callback to be triggered when the camera is stopped.
+Stops the camera and sets a callback to be triggered when the camera is stopped. The camera status needs to be "ready" for it to be stopped. 
 * callback(err): Provides Error as the first argument if an error occures (null on no error).
 
 Possible thrown errors:

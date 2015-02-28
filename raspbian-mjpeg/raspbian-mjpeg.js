@@ -151,6 +151,9 @@ var raspbianMJpeg = function (options) {
     });
     
     return {
+        getStatus: function() {
+            return activeStatus;
+        },
         onStatusChange: function (onStatusChangeCallback) {
             if (!_.isFunction(onStatusChangeCallback)) {
                 throw new TypeError("Provided argument is not a valid callback function");
@@ -222,18 +225,29 @@ var raspbianMJpeg = function (options) {
                 this.stopVideo(function () { onDisposedCallback(); });
             }
             else if (activeStatus == 'timelapse') {
-                this.stopTimelapse(function () { onDisposedCallback(); });
+                this.stopTimelapse(function() { onDisposedCallback(); });
+            } 
+            else {
+                var onStatusChange = this.onStatusChange(function (status) {
+                    if (status == 'ready') {
+                        onStatusChange();
+                        this.stopCamera(function () { onDisposedCallback(); });
+                    }
+                });
             }
-            
-            var onStatusChange = this.onStatusChange(function (status) {
-                if (status == 'ready') {
-                    onStatusChange();
-                    this.stopCamera(function () { onDisposedCallback(); });
-                }
-            });
         },
         takePicture: function (onImageTakenCallback) {
+            if (!_.isFunction(onImageTakenCallback)) {
+                var typeError = new TypeError("Provided argument is not a valid callback function");
+                typeError.propertyName = 'onImageTakenCallback';
+                throw typeError;
+            }
+            
+            
             if (activeStatus != 'ready') {
+                var error = new VError("Picture can be taken only when the status is 'ready'");
+                error.name = "invalidStatus";
+                onImageTakenCallback(error, []);
                 return;
             }
             
@@ -242,7 +256,7 @@ var raspbianMJpeg = function (options) {
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'ready') {
                     onStatusChange();
-                    onImageTakenCallback(createdFiles);
+                    onImageTakenCallback(null, createdFiles);
                 }
             });
             
