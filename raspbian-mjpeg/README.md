@@ -59,3 +59,35 @@ Stop the camera independent of the state it is in. If video is being recorded th
 Possible thrown errors:
 * TypeError; err.property contains the name of the parameter.
 
+#### takePicture(callback)
+Take a picture with the camera. The status needs to be "ready" to take image. If the status is anything else an error will be thrown.
+* callback(err, createdFiles): Provides error as the first argument if an error occures (null on no error). Second argument contains an array with the created file name for the created picture. The array will contain one item.
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to take a picture.
+
+#### startTimelapse(interval, callback)
+Starts taking a picture at fixed intervals. The status needs to be "ready" to start timelapse.
+* interval: the interval between the images taken. The valid value is between 0.1 and 3200
+* callback(err): Provides error as the first argument if an error occures (null on no error). 
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+* RangeError; err.property contains the name of the parameter. This is type is returned when the interval is out of the valid range.
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to start a timelapse.
+
+#### stopTimelapse(callback)
+Stops taking pictures at a fixed interval. The status needs to be "timelapse" to stop the running timelapse.
+* callback(err, createdFiles): Provides error as the first argument if an error occures (null on no error). Second argument contains an array of created files.
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "timelapse". The status needs to be "timelapse" to start a timelapse.
+

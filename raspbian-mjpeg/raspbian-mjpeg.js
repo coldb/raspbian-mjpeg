@@ -263,22 +263,60 @@ var raspbianMJpeg = function (options) {
             addCommand("im");
         },
         startTimelapse: function (interval, onTimelapseStartedCallback) {
+            if (!_.isNumeric(interval)) {
+                var typeErrorInterval = new TypeError("Provided argument is not a valid number");
+                typeErrorInterval.propertyName = 'interval';
+                throw typeErrorInterval;
+            }
+            
+            if (interval < 0.1 || interval > 3200) {
+                var rangeErrorInterval = new RangeError("Timelapse interval must be between 0.1 and 3200");
+                rangeErrorInterval.propertyName = 'interval';
+                throw rangeErrorInterval;
+            }
+            
+            if (!_.isFunction(onTimelapseStartedCallback)) {
+                var typeErrorCallaback = new TypeError("Provided argument is not a valid callback function");
+                typeErrorCallaback.propertyName = 'onTimelapseStartedCallback';
+                throw typeErrorCallaback;
+            }
+            
+            if (activeStatus != 'ready') {
+                var error = new VError("Timelapse can only be started when the status is 'ready'");
+                error.name = "invalidStatus";
+                onTimelapseStartedCallback(error);
+                return;
+            }
+            
             createdFiles = [];
             
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'timelapse') {
                     onStatusChange();
-                    onTimelapseStartedCallback();
+                    onTimelapseStartedCallback(null);
                 }
             });
             
             addCommand("tl " + (interval * 10));
         },
         stopTimelapse: function (onTimelapseCompleteCallback) {
+            if (!_.isFunction(onTimelapseCompleteCallback)) {
+                var typeErrorCallaback = new TypeError("Provided argument is not a valid callback function");
+                typeErrorCallaback.propertyName = 'onTimelapseCompleteCallback';
+                throw typeErrorCallaback;
+            }
+            
+            if (activeStatus != 'timelapse') {
+                var error = new VError("Timelapse can only be stopped when the status is 'timelapse'");
+                error.name = "invalidStatus";
+                onTimelapseCompleteCallback(error, []);
+                return;
+            }
+            
             var onStatusChange = this.onStatusChange(function (status) {
                 if (status == 'ready') {
                     onStatusChange();
-                    onTimelapseCompleteCallback(createdFiles);
+                    onTimelapseCompleteCallback(null, createdFiles);
                 }
             });
             
