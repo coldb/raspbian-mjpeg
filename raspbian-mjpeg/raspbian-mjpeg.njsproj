@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="raspbian-mjpeg.js" />
+    <Content Include=".npmignore" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>
