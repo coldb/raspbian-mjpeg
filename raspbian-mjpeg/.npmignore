@@ -1,3 +1,4 @@
 [Bb]in/
 [Oo]bj/
 *.njsproj
+.ntvs_analysis.dat
