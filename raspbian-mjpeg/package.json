@@ -1,7 +1,7 @@
 {
   "name": "raspbian-mjpeg",
-  "version": "0.0.1",
-  "description": "raspbian-mjpeg",
+  "version": "1.0.0",
+  "description": "A node module for interacting with RaspiMJPEG on the Raspberry PI",
   "main": "raspbian-mjpeg.js",
   "author": {
     "name": "Siim Lerg",
@@ -11,5 +11,11 @@
     "performance-now": "^0.2.0",
     "underscore": "^1.8.2",
     "verror": "^1.6.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coldb/raspbian-mjpeg"
+  },
+  "homepage": "https://github.com/coldb/raspbian-mjpeg",
+  "license": "MIT"
 }
