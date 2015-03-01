@@ -26,9 +26,20 @@ Possible status values
 * md_boxing: ???
 * halted: camera is stopped
 
+#### onPreviewImage(callback)
+Sets a callback function to be triggered when a new image is avalable.
+* callback(data): Provides File data as the first argument.
+
+Returns: method that need to be called to remove the added onPreviewImage callback.
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
 #### onStatusChange(callback)
 Sets a callback function to be triggered when the RaspiMJPEG status changes. 
 * callback(err, newStatus): Provides Error as the first argument if an error occured (null otherwise). Second argument is the new status as a string. 
+
+Returns: method that need to be called to remove the added onStatusChange callback.
 
 Possible values are listed under the getStatus() API methods documentation.
 
@@ -90,4 +101,25 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "timelapse". The status needs to be "timelapse" to start a timelapse.
+
+#### startRecording(callback)
+Starts recording video. The status needs to be "ready" to start recording a video.
+* callback(err): Provides error as the first argument if an error occures (null on no error).
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to start recording a video.
+
+#### stopRecording(recordingCompleteCallback [, boxingStartedCallback])
+Stops video recording. The status needs to be "video" to stop recording a video.
+* recordingCompleteCallback(err, createdFiles): Provides error as the first argument if an error occures (null on no error). Second argument contains an array with the created file name of the video. The array will contain one item.
+* onBoxingStartedCallback(): The callback is triggered when the recorded h264 file conversion is started.
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'invalidStatus'; Status is anything else then "video". The status needs to be "video" to stop recording a video.
 

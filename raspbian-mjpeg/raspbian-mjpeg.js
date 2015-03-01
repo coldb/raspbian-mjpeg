@@ -151,8 +151,21 @@ var raspbianMJpeg = function (options) {
     });
     
     return {
-        getStatus: function() {
+        getStatus: function () {
             return activeStatus;
+        },
+        onPreviewImage: function (onPreviewCallback) {
+            if (!_.isFunction(onPreviewCallback)) {
+                var typeError = new TypeError("Provided argument is not a valid callback function");
+                typeError.propertyName = 'onPreviewCallback';
+                throw typeError;
+            }
+            
+            onPreviewCallbacks.push(onPreviewCallback);
+            
+            return function () {
+                onPreviewCallbacks = _.without(onPreviewCallbacks, onPreviewCallback);
+            };
         },
         onStatusChange: function (onStatusChangeCallback) {
             if (!_.isFunction(onStatusChangeCallback)) {
@@ -225,7 +238,7 @@ var raspbianMJpeg = function (options) {
                 this.stopVideo(function () { onDisposedCallback(); });
             }
             else if (activeStatus == 'timelapse') {
-                this.stopTimelapse(function() { onDisposedCallback(); });
+                this.stopTimelapse(function () { onDisposedCallback(); });
             } 
             else {
                 var onStatusChange = this.onStatusChange(function (status) {
@@ -322,23 +335,62 @@ var raspbianMJpeg = function (options) {
             
             addCommand("tl 0");
         },
-        startVideo: function () {
-            addCommand("ca 1");
-        },
-        stopVideo: function () {
-            addCommand("ca 0");
-        },
-        
-        onPreviewImage: function (onPreviewCallback) {
-            if (!_.isFunction(onPreviewCallback)) {
-                throw new TypeError("Provided argument is not a valid callback function");
+        startRecording: function (onRecordingStartedCallback) {
+            if (!_.isFunction(onRecordingStartedCallback)) {
+                var typeErrorCallaback = new TypeError("Provided argument is not a valid callback function");
+                typeErrorCallaback.propertyName = 'onRecordingStartedCallback';
+                throw typeErrorCallaback;
             }
             
-            onPreviewCallbacks.push(onPreviewCallback);
+            if (activeStatus != 'ready') {
+                var error = new VError("Video recording can only be started when the status is 'ready'");
+                error.name = "invalidStatus";
+                onRecordingStartedCallback(error);
+                return;
+            }
             
-            return function () {
-                onPreviewCallbacks = _.without(onPreviewCallbacks, onPreviewCallback);
-            };
+            addCommand("ca 1");
+        },
+        stopRecording: function (onRecordingCompleteCallback, onBoxingStartedCallback) {
+            if (!_.isFunction(onRecordingCompleteCallback)) {
+                var typeErrorComplete = new TypeError("Provided argument is not a valid callback function");
+                typeErrorComplete.propertyName = 'onRecordingCompleteCallback';
+                throw typeErrorComplete;
+            }
+            
+            if (!_.isUndefined(onBoxingStartedCallback) && !_.isFunction(onBoxingStartedCallback)) {
+                var typeErrorBoxing = new TypeError("Provided argument is not a valid callback function");
+                typeErrorBoxing.propertyName = 'onBoxingStartedCallback';
+                throw typeErrorBoxing;
+            }
+            
+            if (activeStatus != 'video') {
+                var error = new VError("Video recording can only be stopped when the status is 'video'");
+                error.name = "invalidStatus";
+                onRecordingCompleteCallback(error);
+                return;
+            }
+            
+            var onStatusChangeBoxing = this.onStatusChange(function (status) {
+                if (status == 'boxing') {
+                    createdFiles = [];
+                    
+                    onStatusChangeBoxing();
+                    
+                    if (_.isFunction(onBoxingStartedCallback)) {
+                        onBoxingStartedCallback();
+                    }
+                }
+            });
+            
+            var onStatusChangeRecording = this.onStatusChange(function (status) {
+                if (status == 'ready') {
+                    onStatusChangeRecording();
+                    onRecordingCompleteCallback(null, createdFiles);
+                }
+            });
+            
+            addCommand("ca 0");
         }
     };
 };
