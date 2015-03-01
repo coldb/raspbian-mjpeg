@@ -6,7 +6,50 @@ A node module for interacting with RaspiMJPEG that is created by silvanmelchior.
 ## Setup
 See this guide on how to get [node.js running on Raspberry Pi](http://joshondesign.com/2013/10/23/noderpi).
 
+## Install
+
+```
+npm install raspbian-mjpeg
+```
+
+## Usage
+
+### Create object
+
+```
+var raspbianMjpeg = require('raspbian-mjpeg');
+
+var mJpeg = new raspbianMjpeg({
+    statusFilePath: 'status_mjpeg.txt',
+    fifoFilePath: 'FIFO',
+    mJpegFilePath: '/run/shm/mjpeg/cam.jpg',
+    mediaFolder: 'media/',
+    fps: 25
+});
+```
+### Take image
+
+```
+raspbianMjpeg.takePicture(function(err, pictures) {
+    if (err != null) {
+        console.log('ERROR: ' + err.message);
+    } 
+    else {
+        console.log('picture taken');
+        console.log(pictures);
+    }
+});
+```
+
 ## API
+
+### Constructor options
+
+* statusFilePath: path of the status file created by RaspiMJPEG
+* fifoFilePath: path of the FIFO file used by RaspiMJPEG
+* mJpegFilePath: path to the jpeg file that is created by RaspiMJPEG
+* mediaFolder: path to the folder where image and video files are created by RaspiMJPEG
+* fps: the fps of the preview image that is returned.
 
 ### Methods
 
