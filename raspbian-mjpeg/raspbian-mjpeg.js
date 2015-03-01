@@ -145,7 +145,7 @@ var raspbianMJpeg = function (options) {
     fs.watch(options.mediaFolder, function (event, fileName) {
         fileName = options.mediaFolder + fileName;
         
-        if (!_.contains(createdFiles, fileName)) {
+        if (fileName.indexOf(".mp4.h264") == -1 && !_.contains(createdFiles, fileName)) {
             createdFiles.push(fileName);
         }
     });
@@ -192,7 +192,7 @@ var raspbianMJpeg = function (options) {
                 return;
             }
             
-            var onStatusChange = this.onStatusChange(function (status) {
+            var onStatusChange = this.onStatusChange(function (err, status) {
                 if (status == 'ready') {
                     onStatusChange();
                     onStartedCallback(null);
@@ -215,7 +215,7 @@ var raspbianMJpeg = function (options) {
                 return;
             }
             
-            var onStatusChange = this.onStatusChange(function (status) {
+            var onStatusChange = this.onStatusChange(function (err, status) {
                 if (status == 'halted') {
                     onStatusChange();
                     onStoppedCallback(null);
@@ -231,17 +231,17 @@ var raspbianMJpeg = function (options) {
                 throw typeError;
             }
             
-            if (activeStatus == 'ready') {
-                this.stopCamera(function () { onDisposedCallback(); });
+            if (activeStatus == 'ready' || activeStatus == 'halted') {
+                onDisposedCallback();
             }
             else if (activeStatus == 'video') {
-                this.stopVideo(function () { onDisposedCallback(); });
+                this.stopRecording(function () { onDisposedCallback(); });
             }
             else if (activeStatus == 'timelapse') {
                 this.stopTimelapse(function () { onDisposedCallback(); });
             } 
             else {
-                var onStatusChange = this.onStatusChange(function (status) {
+                var onStatusChange = this.onStatusChange(function (err, status) {
                     if (status == 'ready') {
                         onStatusChange();
                         this.stopCamera(function () { onDisposedCallback(); });
@@ -266,7 +266,7 @@ var raspbianMJpeg = function (options) {
             
             createdFiles = [];
             
-            var onStatusChange = this.onStatusChange(function (status) {
+            var onStatusChange = this.onStatusChange(function (err, status) {
                 if (status == 'ready') {
                     onStatusChange();
                     onImageTakenCallback(null, createdFiles);
@@ -276,7 +276,7 @@ var raspbianMJpeg = function (options) {
             addCommand("im");
         },
         startTimelapse: function (interval, onTimelapseStartedCallback) {
-            if (!_.isNumeric(interval)) {
+            if (!_.isNumber(interval)) {
                 var typeErrorInterval = new TypeError("Provided argument is not a valid number");
                 typeErrorInterval.propertyName = 'interval';
                 throw typeErrorInterval;
@@ -303,7 +303,7 @@ var raspbianMJpeg = function (options) {
             
             createdFiles = [];
             
-            var onStatusChange = this.onStatusChange(function (status) {
+            var onStatusChange = this.onStatusChange(function (err, status) {
                 if (status == 'timelapse') {
                     onStatusChange();
                     onTimelapseStartedCallback(null);
@@ -326,7 +326,7 @@ var raspbianMJpeg = function (options) {
                 return;
             }
             
-            var onStatusChange = this.onStatusChange(function (status) {
+            var onStatusChange = this.onStatusChange(function (err, status) {
                 if (status == 'ready') {
                     onStatusChange();
                     onTimelapseCompleteCallback(null, createdFiles);
@@ -348,6 +348,13 @@ var raspbianMJpeg = function (options) {
                 onRecordingStartedCallback(error);
                 return;
             }
+            
+            var onStatusChangeRecording = this.onStatusChange(function (err, status) {
+                if (status == 'video') {
+                    onStatusChangeRecording();
+                    onRecordingStartedCallback(null);
+                }
+            });
             
             addCommand("ca 1");
         },
@@ -371,10 +378,11 @@ var raspbianMJpeg = function (options) {
                 return;
             }
             
-            var onStatusChangeBoxing = this.onStatusChange(function (status) {
+            createdFiles = [];
+            console.log('reset');
+
+            var onStatusChangeBoxing = this.onStatusChange(function (err, status) {
                 if (status == 'boxing') {
-                    createdFiles = [];
-                    
                     onStatusChangeBoxing();
                     
                     if (_.isFunction(onBoxingStartedCallback)) {
@@ -383,7 +391,7 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            var onStatusChangeRecording = this.onStatusChange(function (status) {
+            var onStatusChangeRecording = this.onStatusChange(function (err, status) {
                 if (status == 'ready') {
                     onStatusChangeRecording();
                     onRecordingCompleteCallback(null, createdFiles);
