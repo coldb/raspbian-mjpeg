@@ -67,12 +67,15 @@ var raspbianMJpeg = function (options) {
         }
     }
     
-    function addCommand(command) {
-        exec('echo "' + command + '" > FIFO', function (error, stdout, stderr) {
-            //console.log('stdout: ' + stdout);
-            //console.log('stderr: ' + stderr);
+    function addCommand(command, callback) {
+        exec('echo "' + command + '" > FIFO', function (error) {
             if (error !== null) {
-                console.log('exec error: ' + error);
+                var cmdError = new Error('exec error: ' + error);
+                cmdError.name = 'execError';
+                callback(cmdError);
+            } 
+            else {
+                callback(null);
             }
         });
     }
@@ -186,9 +189,9 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'halted') {
-                var error = new VError("Camera is already running");
-                error.name = "invalidStatus";
-                onStartedCallback(error);
+                var statusError = new VError("Camera is already running");
+                statusError.name = "invalidStatus";
+                onStartedCallback(statusError);
                 return;
             }
             
@@ -199,7 +202,12 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("ru 1");
+            addCommand("ru 1", function (error) {
+                if (error !== null) {
+                    onStatusChange();
+                    onStartedCallback(error);
+                }
+            });
         },
         stopCamera: function (onStoppedCallback) {
             if (!_.isFunction(onStoppedCallback)) {
@@ -209,9 +217,9 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'ready') {
-                var error = new VError("Camera can be stopped only when status is 'ready'");
-                error.name = "invalidStatus";
-                onStoppedCallback(error);
+                var statusError = new VError("Camera can be stopped only when status is 'ready'");
+                statusError.name = "invalidStatus";
+                onStoppedCallback(statusError);
                 return;
             }
             
@@ -222,7 +230,12 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("ru 0");
+            addCommand("ru 0", function (error) {
+                if (error !== null) {
+                    onStatusChange();
+                    onStoppedCallback(error);
+                }
+            });
         },
         disposeCamera: function (onDisposedCallback) {
             if (!_.isFunction(onDisposedCallback)) {
@@ -258,9 +271,9 @@ var raspbianMJpeg = function (options) {
             
             
             if (activeStatus != 'ready') {
-                var error = new VError("Picture can be taken only when the status is 'ready'");
-                error.name = "invalidStatus";
-                onImageTakenCallback(error, []);
+                var statusError = new VError("Picture can be taken only when the status is 'ready'");
+                statusError.name = "invalidStatus";
+                onImageTakenCallback(statusError, []);
                 return;
             }
             
@@ -273,7 +286,12 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("im");
+            addCommand("im", function (error) {
+                if (error !== null) {
+                    onStatusChange();
+                    onImageTakenCallback(error);
+                }
+            });
         },
         startTimelapse: function (interval, onTimelapseStartedCallback) {
             if (!_.isNumber(interval)) {
@@ -295,9 +313,9 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'ready') {
-                var error = new VError("Timelapse can only be started when the status is 'ready'");
-                error.name = "invalidStatus";
-                onTimelapseStartedCallback(error);
+                var statusError = new VError("Timelapse can only be started when the status is 'ready'");
+                statusError.name = "invalidStatus";
+                onTimelapseStartedCallback(statusError);
                 return;
             }
             
@@ -310,7 +328,12 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("tl " + (interval * 10));
+            addCommand("tl " + (interval * 10), function (error) {
+                if (error !== null) {
+                    onStatusChange();
+                    onTimelapseStartedCallback(error);
+                }
+            });
         },
         stopTimelapse: function (onTimelapseCompleteCallback) {
             if (!_.isFunction(onTimelapseCompleteCallback)) {
@@ -320,9 +343,9 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'timelapse') {
-                var error = new VError("Timelapse can only be stopped when the status is 'timelapse'");
-                error.name = "invalidStatus";
-                onTimelapseCompleteCallback(error, []);
+                var statusError = new VError("Timelapse can only be stopped when the status is 'timelapse'");
+                statusError.name = "invalidStatus";
+                onTimelapseCompleteCallback(statusError, []);
                 return;
             }
             
@@ -333,7 +356,12 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("tl 0");
+            addCommand("tl 0", function (error) {
+                if (error !== null) {
+                    onStatusChange();
+                    onTimelapseCompleteCallback(error);
+                }
+            });
         },
         startRecording: function (onRecordingStartedCallback) {
             if (!_.isFunction(onRecordingStartedCallback)) {
@@ -343,9 +371,9 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'ready') {
-                var error = new VError("Video recording can only be started when the status is 'ready'");
-                error.name = "invalidStatus";
-                onRecordingStartedCallback(error);
+                var statusError = new VError("Video recording can only be started when the status is 'ready'");
+                statusError.name = "invalidStatus";
+                onRecordingStartedCallback(statusError);
                 return;
             }
             
@@ -356,7 +384,12 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("ca 1");
+            addCommand("ca 1", function (error) {
+                if (error !== null) {
+                    onStatusChange();
+                    onRecordingStartedCallback(error);
+                }
+            });
         },
         stopRecording: function (onRecordingCompleteCallback, onBoxingStartedCallback) {
             if (!_.isFunction(onRecordingCompleteCallback)) {
@@ -372,15 +405,14 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'video') {
-                var error = new VError("Video recording can only be stopped when the status is 'video'");
-                error.name = "invalidStatus";
-                onRecordingCompleteCallback(error);
+                var statusError = new VError("Video recording can only be stopped when the status is 'video'");
+                statusError.name = "invalidStatus";
+                onRecordingCompleteCallback(statusError);
                 return;
             }
             
             createdFiles = [];
-            console.log('reset');
-
+            
             var onStatusChangeBoxing = this.onStatusChange(function (err, status) {
                 if (status == 'boxing') {
                     onStatusChangeBoxing();
@@ -398,7 +430,13 @@ var raspbianMJpeg = function (options) {
                 }
             });
             
-            addCommand("ca 0");
+            addCommand("ca 0", function (error) {
+                if (error !== null) {
+                    onStatusChangeBoxing();
+                    onStatusChangeRecording();
+                    onRecordingCompleteCallback(error);
+                }
+            });
         }
     };
 };

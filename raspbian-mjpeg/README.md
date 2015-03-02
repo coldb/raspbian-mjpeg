@@ -90,6 +90,7 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "halted". The status needs to be "halted" to start the camera.
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### stopCamera(callback)
 Stops the camera and sets a callback to be triggered when the camera is stopped. The camera status needs to be "ready" for it to be stopped. 
@@ -100,6 +101,7 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to stop the camera.
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### disposeCamera(callback)
 Stop the camera independent of the state it is in. If video is being recorded then recording is stopped and camera is stopped. The same goes for time lapse as well.
@@ -117,6 +119,7 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to take a picture.
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### startTimelapse(interval, callback)
 Starts taking a picture at fixed intervals. The status needs to be "ready" to start time lapse.
@@ -129,6 +132,7 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to start a time lapse.
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### stopTimelapse(callback)
 Stops taking pictures at a fixed interval. The status needs to be "timelapse" to stop the running time lapse.
@@ -139,6 +143,7 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "timelapse". The status needs to be "time lapse" to start a time lapse.
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### startRecording(callback)
 Starts recording video. The status needs to be "ready" to start recording a video.
@@ -149,6 +154,7 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to start recording a video.
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### stopRecording(recordingCompleteCallback [, boxingStartedCallback])
 Stops video recording. The status needs to be "video" to stop recording a video.
@@ -160,4 +166,5 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "video". The status needs to be "video" to stop recording a video.
+* err.name = 'execError'; Error writing command to FIFO file.
 

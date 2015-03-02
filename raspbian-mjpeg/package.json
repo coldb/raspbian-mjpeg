@@ -1,6 +1,6 @@
 {
   "name": "raspbian-mjpeg",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A node module for interacting with RaspiMJPEG on the Raspberry PI",
   "main": "raspbian-mjpeg.js",
   "author": {
