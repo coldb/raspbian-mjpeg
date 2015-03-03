@@ -4,6 +4,12 @@
     };
 }
 
+function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
 var fs = require('fs'),
     exec = require('child_process').exec,
     _ = require('underscore'),
@@ -22,7 +28,15 @@ var raspbianMJpeg = function (options) {
             fifoFilePath: null,
             mediaFolder: null
         },
-        createdFiles = [];
+        createdFiles = [],
+        resolutionSettings = {
+            width: 1920,
+            height: 1080,
+            videoFps: 25,
+            boxingFps: 25,
+            imageWidth: 2592,
+            imageHeight: 1944
+        };
     
     options = _.extend(baseOptions, options);
     
@@ -156,6 +170,26 @@ var raspbianMJpeg = function (options) {
     return {
         getStatus: function () {
             return activeStatus;
+        },
+        setResolution: function (settings) {
+            
+            resolutionSettings = _.extend(resolutionSettings, settings);
+
+            var cmdParts = [];
+            cmdParts.push(pad(resolutionSettings.width, 4));
+            cmdParts.push(pad(resolutionSettings.height, 4));
+            cmdParts.push(pad(resolutionSettings.videoFps, 2));
+            cmdParts.push(pad(resolutionSettings.boxingFps, 2));
+            cmdParts.push(pad(resolutionSettings.imageWidth, 4));
+            cmdParts.push(pad(resolutionSettings.imageHeight, 4));
+            
+            addCommand("px " + cmdParts.join(' ') , function (error) {
+                if (error !== null) {
+                    //onStatusChange();
+                    //onStartedCallback(error);
+                    console.log(error);
+                }
+            });
         },
         onPreviewImage: function (onPreviewCallback) {
             if (!_.isFunction(onPreviewCallback)) {
