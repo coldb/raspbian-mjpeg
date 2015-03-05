@@ -64,6 +64,29 @@ Possible status values
 * boxing: mp4box is running on video
 * halted: camera is stopped
 
+#### setResolution(settings, onComplete)
+Set resolution settings for camera.
+* settings: An object containing properties with settings for the camera. Possible options can be found below.
+* onComplete(err): Provides Error as the first argument if an error happens (null otherwise).
+
+```
+{
+    videoWidth: 1920,
+    videoHeight: 1080,
+    videoFps: 25,
+    boxingFps: 25,
+    imageWidth: 2592,
+    imageHeight: 1944
+}
+```
+
+Possible thrown errors:
+* TypeError; err.property contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
+
 #### onPreviewImage(callback)
 Sets a callback function to be triggered when a new image is available.
 * callback(data): Provides File data as the first argument.

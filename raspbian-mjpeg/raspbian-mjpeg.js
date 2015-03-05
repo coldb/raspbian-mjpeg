@@ -30,8 +30,8 @@ var raspbianMJpeg = function (options) {
         },
         createdFiles = [],
         resolutionSettings = {
-            width: 1920,
-            height: 1080,
+            videoWidth: 1920,
+            videoHeight: 1080,
             videoFps: 25,
             boxingFps: 25,
             imageWidth: 2592,
@@ -167,17 +167,50 @@ var raspbianMJpeg = function (options) {
         }
     });
     
+    function typeError(message, propertyName) {
+        var error = new TypeError(message);
+        error.name = propertyName;
+        return error;
+    }
+
     return {
         getStatus: function () {
             return activeStatus;
         },
-        setResolution: function (settings) {
+        setResolution: function (settings, onComplete) {
+            if (!_.isObject(settings)) {
+                throw typeError("Resolution settings must be an object", 'settings');
+            }
+            
+            if (!_.isNumber(settings.videoWidth)) {
+                throw typeError("Video width is not a valid number", 'settings');
+            }
+            
+            if (!_.isNumber(settings.videoHeight)) {
+                throw typeError("Video height is not a valid number", 'settings');
+            }
+            
+            if (!_.isNumber(settings.videoFps)) {
+                throw typeError("Video FPS is not a valid number", 'settings');
+            }
+            
+            if (!_.isNumber(settings.boxingFps)) {
+                throw typeError("Video boxing FPS is not a valid number", 'settings');
+            }
+            
+            if (!_.isNumber(settings.imageWidth)) {
+                throw typeError("Picture width is not a valid number", 'settings');
+            }
+            
+            if (!_.isNumber(settings.imageHeight)) {
+                throw typeError("Picture height is not a valid number", 'settings');
+            }
             
             resolutionSettings = _.extend(resolutionSettings, settings);
 
             var cmdParts = [];
-            cmdParts.push(pad(resolutionSettings.width, 4));
-            cmdParts.push(pad(resolutionSettings.height, 4));
+            cmdParts.push(pad(resolutionSettings.videoWidth, 4));
+            cmdParts.push(pad(resolutionSettings.videoHeight, 4));
             cmdParts.push(pad(resolutionSettings.videoFps, 2));
             cmdParts.push(pad(resolutionSettings.boxingFps, 2));
             cmdParts.push(pad(resolutionSettings.imageWidth, 4));
@@ -185,9 +218,10 @@ var raspbianMJpeg = function (options) {
             
             addCommand("px " + cmdParts.join(' ') , function (error) {
                 if (error !== null) {
-                    //onStatusChange();
-                    //onStartedCallback(error);
-                    console.log(error);
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
                 }
             });
         },
