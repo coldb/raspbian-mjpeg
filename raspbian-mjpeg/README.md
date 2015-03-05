@@ -69,6 +69,7 @@ Set resolution settings for camera.
 * settings: An object containing properties with settings for the camera. Possible options can be found below.
 * onComplete(err): Provides Error as the first argument if an error happens (null otherwise).
 
+Settings object example
 ```
 {
     videoWidth: 1920,
