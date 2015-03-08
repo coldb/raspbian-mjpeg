@@ -95,7 +95,7 @@ Sets a callback function to be triggered when a new image is available.
 Returns: method that need to be called to remove the added onPreviewImage callback.
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 #### onStatusChange(callback)
 Sets a callback function to be triggered when the RaspiMJPEG status changes. 
@@ -110,7 +110,7 @@ Starts the camera and sets a callback to be triggered when the camera is started
 * callback(err): Provides Error as the first argument if an error happens (null on no error).
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "halted". The status needs to be "halted" to start the camera.
@@ -121,7 +121,7 @@ Stops the camera and sets a callback to be triggered when the camera is stopped.
 * callback(err): Provides Error as the first argument if an error happens (null on no error).
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to stop the camera.
@@ -132,14 +132,14 @@ Stop the camera independent of the state it is in. If video is being recorded th
 * callback(err): Provides error as the first argument if an error happens (null on no error).
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 #### takePicture(callback)
 Take a picture with the camera. The status needs to be "ready" to take image. If the status is anything else an error will be thrown.
 * callback(err, createdFiles): Provides error as the first argument if an error happens (null on no error). Second argument contains an array with the created file name for the created picture. The array will contain one item.
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to take a picture.
@@ -151,7 +151,7 @@ Starts taking a picture at fixed intervals. The status needs to be "ready" to st
 * callback(err): Provides error as the first argument if an error happens (null on no error). 
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 * RangeError; err.property contains the name of the parameter. This is type is returned when the interval is out of the valid range.
 
 Possible returned errors:
@@ -163,7 +163,7 @@ Stops taking pictures at a fixed interval. The status needs to be "timelapse" to
 * callback(err, createdFiles): Provides error as the first argument if an error happens (null on no error). Second argument contains an array of created files.
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "timelapse". The status needs to be "time lapse" to start a time lapse.
@@ -174,7 +174,7 @@ Starts recording video. The status needs to be "ready" to start recording a vide
 * callback(err): Provides error as the first argument if an error happens (null on no error).
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "ready". The status needs to be "ready" to start recording a video.
@@ -186,7 +186,7 @@ Stops video recording. The status needs to be "video" to stop recording a video.
 * onBoxingStartedCallback(): The callback is triggered when the recorded h264 file conversion is started.
 
 Possible thrown errors:
-* TypeError; err.property contains the name of the parameter.
+* TypeError; err.propertyName contains the name of the parameter.
 
 Possible returned errors:
 * err.name = 'invalidStatus'; Status is anything else then "video". The status needs to be "video" to stop recording a video.

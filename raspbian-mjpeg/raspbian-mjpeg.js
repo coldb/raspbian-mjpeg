@@ -65,8 +65,6 @@ var raspbianMJpeg = function (options) {
         startPreviewImageUpdate(Math.max(0, (1000 / options.fps) - (end - start)));
     }
     
-    
-    
     function updatePreviewWorkerState() {
         if (activeStatus == 'halted') {
             stopPreviewImageUpdate();
@@ -167,47 +165,53 @@ var raspbianMJpeg = function (options) {
         }
     });
     
-    function typeError(message, propertyName) {
-        var error = new TypeError(message);
-        error.name = propertyName;
-        return error;
+    function createTypeError(message, propertyName) {
+        var newError = new TypeError(message);
+        newError.propertyName = propertyName;
+        return newError;
     }
-
+    
+    function createError(message, name) {
+        var newError = new Error(message);
+        newError.name = name;
+        return newError;
+    }
+    
     return {
         getStatus: function () {
             return activeStatus;
         },
         setResolution: function (settings, onComplete) {
             if (!_.isObject(settings)) {
-                throw typeError("Resolution settings must be an object", 'settings');
+                throw createTypeError("Resolution settings must be an object", 'settings');
             }
             
             if (!_.isNumber(settings.videoWidth)) {
-                throw typeError("Video width is not a valid number", 'settings');
+                throw createTypeError("Video width is not a valid number", 'settings');
             }
             
             if (!_.isNumber(settings.videoHeight)) {
-                throw typeError("Video height is not a valid number", 'settings');
+                throw createTypeError("Video height is not a valid number", 'settings');
             }
             
             if (!_.isNumber(settings.videoFps)) {
-                throw typeError("Video FPS is not a valid number", 'settings');
+                throw createTypeError("Video FPS is not a valid number", 'settings');
             }
             
             if (!_.isNumber(settings.boxingFps)) {
-                throw typeError("Video boxing FPS is not a valid number", 'settings');
+                throw createTypeError("Video boxing FPS is not a valid number", 'settings');
             }
             
             if (!_.isNumber(settings.imageWidth)) {
-                throw typeError("Picture width is not a valid number", 'settings');
+                throw createTypeError("Picture width is not a valid number", 'settings');
             }
             
             if (!_.isNumber(settings.imageHeight)) {
-                throw typeError("Picture height is not a valid number", 'settings');
+                throw createTypeError("Picture height is not a valid number", 'settings');
             }
             
             resolutionSettings = _.extend(resolutionSettings, settings);
-
+            
             var cmdParts = [];
             cmdParts.push(pad(resolutionSettings.videoWidth, 4));
             cmdParts.push(pad(resolutionSettings.videoHeight, 4));
@@ -227,9 +231,7 @@ var raspbianMJpeg = function (options) {
         },
         onPreviewImage: function (onPreviewCallback) {
             if (!_.isFunction(onPreviewCallback)) {
-                var typeError = new TypeError("Provided argument is not a valid callback function");
-                typeError.propertyName = 'onPreviewCallback';
-                throw typeError;
+                throw createTypeError('Provided argument is not a valid callback function', 'onPreviewCallback');
             }
             
             onPreviewCallbacks.push(onPreviewCallback);
@@ -251,15 +253,11 @@ var raspbianMJpeg = function (options) {
         },
         startCamera: function (onStartedCallback) {
             if (!_.isFunction(onStartedCallback)) {
-                var typeError = new TypeError("Provided argument is not a valid callback function");
-                typeError.propertyName = 'onStartedCallback';
-                throw typeError;
+                throw createTypeError('Provided argument is not a valid callback function', 'onStartedCallback');
             }
             
             if (activeStatus != 'halted') {
-                var statusError = new VError("Camera is already running");
-                statusError.name = "invalidStatus";
-                onStartedCallback(statusError);
+                onStartedCallback(createError('Camera is already running', 'invalidStatus'));
                 return;
             }
             
@@ -279,15 +277,11 @@ var raspbianMJpeg = function (options) {
         },
         stopCamera: function (onStoppedCallback) {
             if (!_.isFunction(onStoppedCallback)) {
-                var typeError = new TypeError("Provided argument is not a valid callback function");
-                typeError.propertyName = 'onStoppedCallback';
-                throw typeError;
+                throw createTypeError('Provided argument is not a valid callback function', 'onStoppedCallback');
             }
             
             if (activeStatus != 'ready') {
-                var statusError = new VError("Camera can be stopped only when status is 'ready'");
-                statusError.name = "invalidStatus";
-                onStoppedCallback(statusError);
+                onStoppedCallback(createError('Camera can be stopped only when status is "ready"', 'invalidStatus'));
                 return;
             }
             
@@ -307,9 +301,7 @@ var raspbianMJpeg = function (options) {
         },
         disposeCamera: function (onDisposedCallback) {
             if (!_.isFunction(onDisposedCallback)) {
-                var typeError = new TypeError("Provided argument is not a valid callback function");
-                typeError.propertyName = 'onDisposedCallback';
-                throw typeError;
+                throw createTypeError('Provided argument is not a valid callback function', 'onDisposedCallback');
             }
             
             if (activeStatus == 'ready' || activeStatus == 'halted') {
@@ -332,16 +324,11 @@ var raspbianMJpeg = function (options) {
         },
         takePicture: function (onImageTakenCallback) {
             if (!_.isFunction(onImageTakenCallback)) {
-                var typeError = new TypeError("Provided argument is not a valid callback function");
-                typeError.propertyName = 'onImageTakenCallback';
-                throw typeError;
+                throw createTypeError('Provided argument is not a valid callback function', 'onImageTakenCallback');
             }
             
-            
             if (activeStatus != 'ready') {
-                var statusError = new VError("Picture can be taken only when the status is 'ready'");
-                statusError.name = "invalidStatus";
-                onImageTakenCallback(statusError, []);
+                onImageTakenCallback(createError('Picture can be taken only when the status is "ready"', 'invalidStatus'), []);
                 return;
             }
             
@@ -363,9 +350,7 @@ var raspbianMJpeg = function (options) {
         },
         startTimelapse: function (interval, onTimelapseStartedCallback) {
             if (!_.isNumber(interval)) {
-                var typeErrorInterval = new TypeError("Provided argument is not a valid number");
-                typeErrorInterval.propertyName = 'interval';
-                throw typeErrorInterval;
+                throw createTypeError('Provided argument is not a valid number', 'interval');
             }
             
             if (interval < 0.1 || interval > 3200) {
@@ -381,9 +366,7 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'ready') {
-                var statusError = new VError("Timelapse can only be started when the status is 'ready'");
-                statusError.name = "invalidStatus";
-                onTimelapseStartedCallback(statusError);
+                onTimelapseStartedCallback(createError('Timelapse can only be started when the status is "ready"', 'invalidStatus'));
                 return;
             }
             
@@ -405,15 +388,11 @@ var raspbianMJpeg = function (options) {
         },
         stopTimelapse: function (onTimelapseCompleteCallback) {
             if (!_.isFunction(onTimelapseCompleteCallback)) {
-                var typeErrorCallaback = new TypeError("Provided argument is not a valid callback function");
-                typeErrorCallaback.propertyName = 'onTimelapseCompleteCallback';
-                throw typeErrorCallaback;
+                throw createTypeError('Provided argument is not a valid callback function', 'onTimelapseCompleteCallback');
             }
             
             if (activeStatus != 'timelapse') {
-                var statusError = new VError("Timelapse can only be stopped when the status is 'timelapse'");
-                statusError.name = "invalidStatus";
-                onTimelapseCompleteCallback(statusError, []);
+                onTimelapseCompleteCallback(createError('Timelapse can only be stopped when the status is "timelapse"', 'invalidStatus'), []);
                 return;
             }
             
@@ -433,15 +412,11 @@ var raspbianMJpeg = function (options) {
         },
         startRecording: function (onRecordingStartedCallback) {
             if (!_.isFunction(onRecordingStartedCallback)) {
-                var typeErrorCallaback = new TypeError("Provided argument is not a valid callback function");
-                typeErrorCallaback.propertyName = 'onRecordingStartedCallback';
-                throw typeErrorCallaback;
+                throw createTypeError('Provided argument is not a valid callback function', 'onRecordingStartedCallback');
             }
             
             if (activeStatus != 'ready') {
-                var statusError = new VError("Video recording can only be started when the status is 'ready'");
-                statusError.name = "invalidStatus";
-                onRecordingStartedCallback(statusError);
+                onRecordingStartedCallback(createError('Video recording can only be started when the status is "ready"', 'invalidStatus'));
                 return;
             }
             
@@ -461,9 +436,7 @@ var raspbianMJpeg = function (options) {
         },
         stopRecording: function (onRecordingCompleteCallback, onBoxingStartedCallback) {
             if (!_.isFunction(onRecordingCompleteCallback)) {
-                var typeErrorComplete = new TypeError("Provided argument is not a valid callback function");
-                typeErrorComplete.propertyName = 'onRecordingCompleteCallback';
-                throw typeErrorComplete;
+                throw createTypeError('Provided argument is not a valid callback function', 'onRecordingCompleteCallback');
             }
             
             if (!_.isUndefined(onBoxingStartedCallback) && !_.isFunction(onBoxingStartedCallback)) {
@@ -473,9 +446,7 @@ var raspbianMJpeg = function (options) {
             }
             
             if (activeStatus != 'video') {
-                var statusError = new VError("Video recording can only be stopped when the status is 'video'");
-                statusError.name = "invalidStatus";
-                onRecordingCompleteCallback(statusError);
+                onRecordingCompleteCallback(createError('Video recording can only be stopped when the status is "video"', 'invalidStatus'));
                 return;
             }
             
