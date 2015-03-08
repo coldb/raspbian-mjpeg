@@ -87,6 +87,17 @@ Possible thrown errors:
 Possible returned errors:
 * err.name = 'execError'; Error writing command to FIFO file.
 
+#### setSharpness(value, onComplete)
+Set cameras sharpness setting.
+* value: A numeric value for the new sharpness value (-100...100).
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+
+
 
 #### onPreviewImage(callback)
 Sets a callback function to be triggered when a new image is available.

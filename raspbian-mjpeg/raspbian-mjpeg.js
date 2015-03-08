@@ -36,6 +36,12 @@ var raspbianMJpeg = function (options) {
             boxingFps: 25,
             imageWidth: 2592,
             imageHeight: 1944
+        },
+        cameraOptions = {
+            sharpness: null,
+            contrast: null,
+            brightness: null,
+            saturation: null
         };
     
     options = _.extend(baseOptions, options);
@@ -177,9 +183,45 @@ var raspbianMJpeg = function (options) {
         return newError;
     }
     
+    function createRangeError(message, propertyName) {
+        var newError = new RangeError(message);
+        newError.propertyName = propertyName;
+        throw newError;
+    }
+    
     return {
         getStatus: function () {
             return activeStatus;
+        },
+        setSharpness: function(value, onComplete) {
+            if (!_.isNumber(settings.videoWidth)) {
+                throw createTypeError('New sharpness is not a valid number', 'value');
+            }
+            
+            if (value < -100 || value > 100) {
+                throw createRangeError('Sharpness value must be between -100 and 100', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.sharpness == value) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.sharpness = value;
+            }
+
+            addCommand("sh " + value, function(error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
         },
         setResolution: function (settings, onComplete) {
             if (!_.isObject(settings)) {
@@ -242,7 +284,7 @@ var raspbianMJpeg = function (options) {
         },
         onStatusChange: function (onStatusChangeCallback) {
             if (!_.isFunction(onStatusChangeCallback)) {
-                throw new TypeError("Provided argument is not a valid callback function");
+                throw createTypeError('Provided argument is not a valid callback function', 'onStatusChangeCallback');
             }
             
             onStatusChangeCallbacks.push(onStatusChangeCallback);
@@ -354,9 +396,7 @@ var raspbianMJpeg = function (options) {
             }
             
             if (interval < 0.1 || interval > 3200) {
-                var rangeErrorInterval = new RangeError("Timelapse interval must be between 0.1 and 3200");
-                rangeErrorInterval.propertyName = 'interval';
-                throw rangeErrorInterval;
+                throw createRangeError('Timelapse interval must be between 0.1 and 3200', 'interval');
             }
             
             if (!_.isFunction(onTimelapseStartedCallback)) {
