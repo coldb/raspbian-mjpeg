@@ -41,7 +41,8 @@ var raspbianMJpeg = function (options) {
             sharpness: null,
             contrast: null,
             brightness: null,
-            saturation: null
+            saturation: null,
+            iso: null
         };
     
     options = _.extend(baseOptions, options);
@@ -194,7 +195,7 @@ var raspbianMJpeg = function (options) {
             return activeStatus;
         },
         setSharpness: function(value, onComplete) {
-            if (!_.isNumber(settings.videoWidth)) {
+            if (!_.isNumber(value)) {
                 throw createTypeError('New sharpness is not a valid number', 'value');
             }
             
@@ -215,6 +216,126 @@ var raspbianMJpeg = function (options) {
             }
 
             addCommand("sh " + value, function(error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setContrast: function(value, onComplete) {
+            if (!_.isNumber(value)) {
+                throw createTypeError('New contrast is not a valid number', 'value');
+            }
+            
+            if (value < -100 || value > 100) {
+                throw createRangeError('Contrast value must be between -100 and 100', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.contrast == value) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.contrast = value;
+            }
+            
+            addCommand("co " + value, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setBrightness: function(value, onComplete) {
+            if (!_.isNumber(value)) {
+                throw createTypeError('New brightness is not a valid number', 'value');
+            }
+            
+            if (value < 0 || value > 100) {
+                throw createRangeError('Brightness value must be between 0 and 100', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.brightness == value) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.brightness = value;
+            }
+            
+            addCommand("br " + value, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setSaturation: function(value, onComplete) {
+            if (!_.isNumber(value)) {
+                throw createTypeError('New saturation is not a valid number', 'value');
+            }
+            
+            if (value < -100 || value > 100) {
+                throw createRangeError('Saturation value must be between -100 and 100', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.saturation == value) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.saturation = value;
+            }
+            
+            addCommand("sa " + value, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setISO: function(value, onComplete) {
+            if (!_.isNumber(value)) {
+                throw createTypeError('New ISO is not a valid number', 'value');
+            }
+
+            if (!_.contains([0, 100, 200, 400, 800], value)) {
+                throw createRangeError('ISO must be one of the following 0 (auto), 100, 200, 400 or 800', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.iso == value) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.iso = value;
+            }
+            
+            addCommand("is " + value, function (error) {
                 if (error !== null) {
                     onComplete(error);
                 } 

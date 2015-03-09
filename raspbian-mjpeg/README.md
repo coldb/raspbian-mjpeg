@@ -96,8 +96,56 @@ Possible thrown errors:
 * TypeError; err.propertyName contains the name of the parameter.
 * RangeError; err.propertyName contains the name of the parameter.
 
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
 
+#### setContrast(value, onComplete)
+Set cameras contrast setting.
+* value: A numeric value for the new contrast value (-100...100).
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
 
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
+#### setBrightness(value, onComplete)
+Set cameras brightness setting.
+* value: A numeric value for the new brightness value (-100...100).
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
+#### setSaturation(value, onComplete)
+Set cameras saturation setting.
+* value: A numeric value for the new saturation value (-100...100).
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
+#### setISO(value, onComplete)
+Set cameras ISO setting.
+* value: A numeric value for the new iso value. Possible values 0 (auto), 100, 200, 400, 800.
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
 
 #### onPreviewImage(callback)
 Sets a callback function to be triggered when a new image is available.
