@@ -42,7 +42,11 @@ var raspbianMJpeg = function (options) {
             contrast: null,
             brightness: null,
             saturation: null,
-            iso: null
+            iso: null,
+            exposureMode: null,
+            whiteBalance: null,
+            meteringMode: null,
+            imageEffect: null
         };
     
     options = _.extend(baseOptions, options);
@@ -87,13 +91,17 @@ var raspbianMJpeg = function (options) {
     }
     
     function addCommand(command, callback) {
-        exec('echo "' + command + '" > FIFO', function (error) {
+        fs.open(options.fifoFilePath, 'w', function (error, fd) {
             if (error !== null) {
+                fs.closeSync(fd);
                 var cmdError = new Error('exec error: ' + error);
                 cmdError.name = 'execError';
                 callback(cmdError);
             } 
             else {
+                fs.writeSync(fd, command);
+                fs.closeSync(fd);
+                
                 callback(null);
             }
         });
@@ -194,7 +202,47 @@ var raspbianMJpeg = function (options) {
         getStatus: function () {
             return activeStatus;
         },
-        setSharpness: function(value, onComplete) {
+        exec: function (command, onComplete) {
+            addCommand(command, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setExposureMode: function (mode, onComplete) {
+            if (!_.isString(mode)) {
+                throw createTypeError('New exposure mode is not a valid string', 'mode');
+            }
+            
+            if (!_.contains(['off', 'auto', 'night', 'nightpreview', 'backlight', 'spotlight', 'sports', 'snow', 'beach', 'verylong', 'fixedfps', 'antishake', 'fireworks'], mode)) {
+                throw createRangeError('Exposure mode is not valid (' + mode + ')', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.exposureMode == mode) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.sharpness = mode;
+            }
+
+            addCommand("em " + mode, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setSharpness: function (value, onComplete) {
             if (!_.isNumber(value)) {
                 throw createTypeError('New sharpness is not a valid number', 'value');
             }
@@ -214,8 +262,8 @@ var raspbianMJpeg = function (options) {
             else {
                 cameraOptions.sharpness = value;
             }
-
-            addCommand("sh " + value, function(error) {
+            
+            addCommand("sh " + value, function (error) {
                 if (error !== null) {
                     onComplete(error);
                 } 
@@ -224,7 +272,7 @@ var raspbianMJpeg = function (options) {
                 }
             });
         },
-        setContrast: function(value, onComplete) {
+        setContrast: function (value, onComplete) {
             if (!_.isNumber(value)) {
                 throw createTypeError('New contrast is not a valid number', 'value');
             }
@@ -254,7 +302,7 @@ var raspbianMJpeg = function (options) {
                 }
             });
         },
-        setBrightness: function(value, onComplete) {
+        setBrightness: function (value, onComplete) {
             if (!_.isNumber(value)) {
                 throw createTypeError('New brightness is not a valid number', 'value');
             }
@@ -284,7 +332,7 @@ var raspbianMJpeg = function (options) {
                 }
             });
         },
-        setSaturation: function(value, onComplete) {
+        setSaturation: function (value, onComplete) {
             if (!_.isNumber(value)) {
                 throw createTypeError('New saturation is not a valid number', 'value');
             }
@@ -314,11 +362,11 @@ var raspbianMJpeg = function (options) {
                 }
             });
         },
-        setISO: function(value, onComplete) {
+        setISO: function (value, onComplete) {
             if (!_.isNumber(value)) {
                 throw createTypeError('New ISO is not a valid number', 'value');
             }
-
+            
             if (!_.contains([0, 100, 200, 400, 800], value)) {
                 throw createRangeError('ISO must be one of the following 0 (auto), 100, 200, 400 or 800', 'value');
             }
