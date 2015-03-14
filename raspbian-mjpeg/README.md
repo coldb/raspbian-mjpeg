@@ -88,7 +88,7 @@ Possible returned errors:
 * err.name = 'execError'; Error writing command to FIFO file.
 
 #### setExposureMode(mode, onComplete)
-Set cameras exposure mode setting.
+Set cameras exposure mode.
 * mode: A string representation of the mode. (range: [off/auto/night/nightpreview/backlight/spotlight/sports/snow/beach/verylong/fixedfps/antishake/fireworks]) 
 * onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
 
@@ -98,6 +98,43 @@ Possible thrown errors:
 
 Possible returned errors:
 * err.name = 'execError'; Error writing command to FIFO file.
+
+#### setWhiteBalance(mode, onComplete)
+Set white balance mode.
+* mode: A string representation of the mode. (range: [off/auto/sun/cloudy/shade/tungsten/fluorescent/incandescent/flash/horizon])
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
+#### setMeteringMode(mode, onComplete)
+Set metering mode.
+* mode: A string representation of the mode. (range: [average/spot/backlit/matrix])
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
+#### setImageEffect(mode)
+Set image effect.
+* mode: A string representation of the mode. (range: [none/negative/solarise/posterize/whiteboard/blackboard/sketch/denoise/emboss/oilpaint/hatch/gpen/pastel/watercolour/film/blur/saturation/colourswap/washedout/posterise/colourpoint/colourbalance/cartoon])
+* onComplete(error): Provides Error object as the first argument if an error happens (null otherwise).
+
+Possible thrown errors:
+* TypeError; err.propertyName contains the name of the parameter.
+* RangeError; err.propertyName contains the name of the parameter.
+
+Possible returned errors:
+* err.name = 'execError'; Error writing command to FIFO file.
+
 
 #### setSharpness(value, onComplete)
 Set cameras sharpness setting.

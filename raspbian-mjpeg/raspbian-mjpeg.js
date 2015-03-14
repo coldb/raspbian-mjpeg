@@ -13,7 +13,6 @@ function pad(n, width, z) {
 var fs = require('fs'),
     exec = require('child_process').exec,
     _ = require('underscore'),
-    VError = require('verror'),
     now = require("performance-now");
 
 var raspbianMJpeg = function (options) {
@@ -131,7 +130,7 @@ var raspbianMJpeg = function (options) {
     }
     
     if (options.fps <= 0 || options.fps > 30) {
-        throw new new VError('Provided FPS value (%s) must be bigger then 0 and less or equal to 30', options.fps);
+        throw new new Error('Provided FPS value (' + options.fps + ') must be bigger then 0 and less or equal to 30');
     }
     
     if (!_.isString(options.mJpegFilePath) || options.mJpegFilePath == '') {
@@ -212,6 +211,9 @@ var raspbianMJpeg = function (options) {
                 }
             });
         },
+        setExposureCompensation: function (value, onComplete) {
+            // TODO: Add functionality  
+        },
         setExposureMode: function (mode, onComplete) {
             if (!_.isString(mode)) {
                 throw createTypeError('New exposure mode is not a valid string', 'mode');
@@ -230,10 +232,100 @@ var raspbianMJpeg = function (options) {
                 return;
             } 
             else {
-                cameraOptions.sharpness = mode;
+                cameraOptions.exposureMode = mode;
             }
-
+            
             addCommand("em " + mode, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setWhiteBalance: function (mode, onComplete) {
+            if (!_.isString(mode)) {
+                throw createTypeError('New white balance is not a valid string', 'mode');
+            }
+            
+            if (!_.contains(['off', 'auto', 'sun', 'cloudy', 'shade', 'tungsten', 'fluorescent', 'incandescent', 'flash', 'horizon'], mode)) {
+                throw createRangeError('White balance is not valid (' + mode + ')', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.whiteBalance == mode) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.whiteBalance = mode;
+            }
+            
+            addCommand("wb " + mode, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setMeteringMode: function (mode, onComplete) {
+            if (!_.isString(mode)) {
+                throw createTypeError('New metering mode is not a valid string', 'mode');
+            }
+            
+            if (!_.contains(['average', 'spot', 'backlit', 'matrix'], mode)) {
+                throw createRangeError('Metering mode is not valid (' + mode + ')', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.meteringMode == mode) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.meteringMode = mode;
+            }
+            
+            addCommand("mm " + mode, function (error) {
+                if (error !== null) {
+                    onComplete(error);
+                } 
+                else {
+                    onComplete(null);
+                }
+            });
+        },
+        setImageEffect: function (mode, onComplete) {
+            if (!_.isString(mode)) {
+                throw createTypeError('New image effect is not a valid string', 'mode');
+            }
+            
+            if (!_.contains(['none', 'negative', 'solarise', 'posterize', 'whiteboard', 'blackboard', 'sketch', 'denoise', 'emboss', 'oilpaint', 'hatch', 'gpen', 'pastel', 'watercolour', 'film', 'blur', 'saturation', 'colourswap', 'washedout', 'posterise', 'colourpoint', 'colourbalance', 'cartoon'], mode)) {
+                throw createRangeError('Image effect is not valid (' + mode + ')', 'value');
+            }
+            
+            if (!_.isFunction(onComplete)) {
+                throw createTypeError('Provided argument is not a valid callback function', 'onComplete');
+            }
+            
+            if (cameraOptions.imageEffect == mode) {
+                onComplete(null);
+                return;
+            } 
+            else {
+                cameraOptions.imageEffect = mode;
+            }
+            
+            addCommand("ie " + mode, function (error) {
                 if (error !== null) {
                     onComplete(error);
                 } 
